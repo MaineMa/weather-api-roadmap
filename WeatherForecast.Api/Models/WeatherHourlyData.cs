@@ -1,3 +1,5 @@
+namespace WeatherForecast.Api.Models;
+
 class WeatherHourlyData
 {
     public string Datetime {get; set;} = string.Empty;

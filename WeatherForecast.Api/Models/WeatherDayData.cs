@@ -1,3 +1,5 @@
+namespace WeatherForecast.Api.Models;
+
 class WeatherDayData
 {
     public string Datetime { get; set; } = string.Empty;
@@ -7,5 +9,4 @@ class WeatherDayData
     public double ChanceOfRain { get; set; }
     public double Humidity {get; set;}
     public string Description {get; set;} = string.Empty;
-
 }
