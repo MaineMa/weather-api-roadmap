@@ -6,6 +6,4 @@ class WeatherHourlyData
     public double Temp {get; set;}
     public double Humidity {get; set;}
     public string Conditions {get; set;} = string.Empty;
-    
-
 }
