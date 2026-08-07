@@ -1,0 +1,29 @@
+## .NET / Build
+bin/
+obj/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## User-specific files
+*.user
+*.suo
+
+## Secrets y configuración local
+appsettings.Development.json
+appsettings.local.json
+*.env
+secrets.json
+
+## Logs
+*.log
+logs/
+
+## OS
+.DS_Store
+Thumbs.db
