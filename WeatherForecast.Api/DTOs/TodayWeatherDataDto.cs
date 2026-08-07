@@ -1,4 +1,5 @@
 namespace WeatherForecast.Api.Dtos;
+
 class TodayWeatherDataDto
 {
     public double Latitude {get; set;}
