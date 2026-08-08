@@ -15,7 +15,7 @@ class WeatherForecastRepository(HttpClient httpClient, IConfiguration configurat
     {
         var apiKey = _configuration["WeatherApi:ApiKey"];
         var today = DateTime.Today.ToString("yyyy-MM-dd");
-        var url = $"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{latitude}%2C{longitude}/{today}?unitGroup=metric&key={apiKey}&contentType=json&lang=es&include=days";
+        var url = $"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{latitude}%2C{longitude}/{today}?unitGroup=metric&key={apiKey}&contentType=json&lang=es&include=days%2Ccurrent";
         var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
         var json = await response.Content.ReadAsStringAsync();
@@ -56,18 +56,76 @@ class WeatherForecastRepository(HttpClient httpClient, IConfiguration configurat
         };
     }
 
-    public Task<TodayWeatherDataDto> GetTodaysWeatherDataAsync(double latitude, double longitude)
+    public async Task<TodayWeatherDataDto> GetTodaysWeatherDataAsync(double latitude, double longitude)
     {
-        throw new NotImplementedException();
+        var apiKey = _configuration["WeatherApi:ApiKey"];
+        var today = DateTime.Today.ToString("yyyy-MM-dd");
+        var url = $"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{latitude}%2C{longitude}/{today}?unitGroup=metric&key={apiKey}&contentType=json&lang=es&include=days";
+        var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<WeatherDaysData>(json,_jsonOptions) ?? throw new Exception("Couldn't deserialize weather response");
+        var day = data.WeatherDays.FirstOrDefault() ?? throw new Exception("No se encontraron datos del día actual.");
+        return new TodayWeatherDataDto 
+        {
+            Datetime = day.Datetime,
+            Timezone = data.Timezone,
+            Conditions = day.Conditions,
+            TempMax = day.TempMax,
+            TempMin = day.TempMin,
+            ChanceOfRain = day.ChanceOfRain,
+            Humidity = day.Humidity,
+            Description = day.Description
+        };
     }
 
-    public Task<WeatherDataDto> GetWeatherDataAsync(GetWeatherWithDatesRequestDto request)
+    public async Task<WeatherDataDto> GetWeatherDataAsync(GetWeatherWithDatesRequestDto request)
     {
-        throw new NotImplementedException();
+        var apiKey = _configuration["WeatherApi:ApiKey"];
+        var startDate = request.StartDate;
+        var endDate = request.EndDate;
+        var url = $"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{request.Latitude}%2C{request.Longitude}/{startDate}/{endDate}?unitGroup=metric&key={apiKey}&contentType=json&lang=es&include=days";
+        var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<WeatherDaysData>(json,_jsonOptions) ?? throw new Exception("Couldn't deserialize weather response");
+        return new WeatherDataDto
+        {
+            Timezone = data.Timezone,
+            WeatherDays = [.. data.WeatherDays.Select(d => new WeatherDayDataDto
+            {
+                Datetime = d.Datetime,
+                Conditions = d.Conditions,
+                TempMax = d.TempMax,
+                TempMin = d.TempMin,
+                ChanceOfRain = d.ChanceOfRain,
+                Humidity = d.Humidity,
+                Description = d.Description
+            })]
+        };
     }
 
-    public Task<WeatherDataDto> GetWeatherForecastDataAsync(double latitude, double longitude)
+    public async Task<WeatherDataDto> GetWeatherForecastDataAsync(double latitude, double longitude)
     {
-        throw new NotImplementedException();
+        var apiKey = _configuration["WeatherApi:ApiKey"];
+        var url = $"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{latitude}%2C{longitude}?unitGroup=metric&include=days&key={apiKey}&contentType=json&lang=es";
+        var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<WeatherDaysData>(json,_jsonOptions) ?? throw new Exception("Couldn't deserialize weather response");
+        return new WeatherDataDto
+        {
+            Timezone = data.Timezone,
+            WeatherDays = [.. data.WeatherDays.Select(d => new WeatherDayDataDto
+            {
+                Datetime = d.Datetime,
+                Conditions = d.Conditions,
+                TempMax = d.TempMax,
+                TempMin = d.TempMin,
+                ChanceOfRain = d.ChanceOfRain,
+                Humidity = d.Humidity,
+                Description = d.Description
+            })]
+        };
     }
 }
