@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace WeatherForecast.Api.Models;
 
 class WeatherHourlyData
@@ -6,4 +8,6 @@ class WeatherHourlyData
     public double Temp {get; set;}
     public double Humidity {get; set;}
     public string Conditions {get; set;} = string.Empty;
+    [JsonPropertyName("precipprob")]
+    public double ChanceOfRain {get;set;}
 }
