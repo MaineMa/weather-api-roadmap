@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using WeatherForecast.Api.Models;
 
-class LastWeekWeatherData
+class WeatherDaysData
 {   
     public string Timezone {get;set;} = string.Empty;
     [JsonPropertyName("days")]

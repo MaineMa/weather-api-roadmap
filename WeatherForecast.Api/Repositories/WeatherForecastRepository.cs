@@ -39,7 +39,7 @@ class WeatherForecastRepository(HttpClient httpClient, IConfiguration configurat
         var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
         var json = await response.Content.ReadAsStringAsync();
-        var data = JsonSerializer.Deserialize<LastWeekWeatherData>(json,_jsonOptions) ?? throw new Exception("Couldn't deserialize weather response");
+        var data = JsonSerializer.Deserialize<WeatherDaysData>(json,_jsonOptions) ?? throw new Exception("Couldn't deserialize weather response");
         return new WeatherDataDto
         {
             Timezone = data.Timezone,
