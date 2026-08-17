@@ -4,9 +4,9 @@ using WeatherForecast.Api.Dtos;
 
 interface IWeatherForecastRepository
 {
-    Task<TodayWeatherDataDto> GetTodaysWeatherDataAsync(double Latitude, double Longitude);
+    Task<TodayWeatherDataDto> GetTodaysWeatherDataAsync(double latitude, double longitude);
     Task<WeatherDataDto> GetWeatherDataAsync(GetWeatherWithDatesRequestDto request);
-    Task<CurrentWeatherDataDto> GetCurrentWeatherAsync(double Latitude, double Longitude);
-    Task<WeatherDataDto> GetLastWeekWeatherDataAsync(double Latitude, double Longitude);
-    Task<WeatherDataDto> GetWeatherForecastDataAsync(double Latitude, double Longitude);
+    Task<CurrentWeatherDataDto> GetCurrentWeatherAsync(double latitude, double longitude);
+    Task<WeatherDataDto> GetLastWeekWeatherDataAsync(double latitude, double longitude);
+    Task<WeatherDataDto> GetWeatherForecastDataAsync(double latitude, double longitude);
 }
