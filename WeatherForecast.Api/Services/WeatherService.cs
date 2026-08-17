@@ -41,6 +41,40 @@ class WeatherService(IDistributedCache _cache, IWeatherForecastRepository _repos
         return data;
     }
 
+    public async Task<WeatherDaysData> GetWeatherDataAsync(double latitude, double longitude, string startDate, string endDate)
+    {
+        string key = $"weather:${startDate}:${endDate}:${latitude}-${longitude}";
+        var cachedData = await _cache.GetStringAsync(key);
+        if (cachedData is not null)
+            return JsonSerializer.Deserialize<WeatherDaysData>(cachedData)!;
+
+        var dto = await _repository.GetWeatherDataAsync(latitude,longitude,startDate,endDate);
+        WeatherDaysData data = new()
+        {
+          Timezone = dto.Timezone,
+          WeatherDays = [.. dto.WeatherDays.Select(d => new WeatherDayData
+            {
+                Datetime = d.Datetime,
+                Conditions = d.Conditions,
+                TempMax = d.TempMax,
+                TempMin = d.TempMin,
+                ChanceOfRain = d.ChanceOfRain,
+                Humidity = d.Humidity,
+                Description = d.Description
+            })]
+        };
+
+        await _cache.SetStringAsync(key,
+            JsonSerializer.Serialize(data),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            }
+        );
+
+        return data;
+    }
+
     public async Task<WeatherDaysData> GetLastWeekWeatherAsync(double latitude, double longitude)
     {
         string key = $"weather:lastweek:${latitude}-${longitude}";
