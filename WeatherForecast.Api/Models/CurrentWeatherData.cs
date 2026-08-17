@@ -1,6 +1,5 @@
 using WeatherForecast.Api.Models;
 
-class CurrentWeatherData
-{
-    public WeatherHourlyData CurrentConditions {get;set;} = new();
+class CurrentWeatherData{
+    public required WeatherHourlyData CurrentConditions { get; set; }
 }
