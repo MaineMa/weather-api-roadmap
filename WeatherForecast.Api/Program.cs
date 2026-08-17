@@ -1,15 +1,25 @@
 using System.Text.Json;
+using WeatherForecast.Api.Repositories;
+using WeatherForecast.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.Configure<JsonSerializerOptions>(options =>
 {
     options.PropertyNameCaseInsensitive = true;
 });
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379";
+
+});
+
+builder.Services.AddScoped<IWeatherForecastRepository, WeatherForecastRepository>();
+
+builder.Services.AddScoped<WeatherService>();
 
 var app = builder.Build();
 
