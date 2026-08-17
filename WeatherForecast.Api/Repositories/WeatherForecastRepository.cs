@@ -79,12 +79,10 @@ class WeatherForecastRepository(HttpClient httpClient, IConfiguration configurat
         };
     }
 
-    public async Task<WeatherDataDto> GetWeatherDataAsync(GetWeatherWithDatesRequestDto request)
+    public async Task<WeatherDataDto> GetWeatherDataAsync(double latitude, double longitude, string startDate, string endDate)
     {
         var apiKey = _configuration["WeatherApi:ApiKey"];
-        var startDate = request.StartDate;
-        var endDate = request.EndDate;
-        var url = $"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{request.Latitude}%2C{request.Longitude}/{startDate}/{endDate}?unitGroup=metric&key={apiKey}&contentType=json&lang=es&include=days";
+        var url = $"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{latitude}%2C{longitude}/{startDate}/{endDate}?unitGroup=metric&key={apiKey}&contentType=json&lang=es&include=days";
         var response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
         var json = await response.Content.ReadAsStringAsync();
