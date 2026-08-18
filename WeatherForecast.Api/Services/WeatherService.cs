@@ -10,6 +10,70 @@ class WeatherService(IDistributedCache _cache, IWeatherForecastRepository _repos
     private readonly IDistributedCache _cache = _cache;
     private readonly IWeatherForecastRepository _repository = _repository;
 
+    public async Task<WeatherDayData> GetTodayWeatherAsync(double latitude, double longitude)
+    {
+        string key = $"weather:today:${latitude}-${longitude}";
+        var cachedData = await _cache.GetStringAsync(key);
+        if (cachedData is not null)
+            return JsonSerializer.Deserialize<WeatherDayData>(cachedData)!;
+
+        var dto = await _repository.GetTodaysWeatherDataAsync(latitude,longitude);
+        WeatherDayData data = new()
+            {
+                Datetime = dto.Datetime,
+                Conditions = dto.Conditions,
+                TempMax = dto.TempMax,
+                TempMin = dto.TempMin,
+                ChanceOfRain = dto.ChanceOfRain,
+                Humidity = dto.Humidity,
+                Description = dto.Description
+            };
+        
+        await _cache.SetStringAsync(key,
+            JsonSerializer.Serialize(data),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            }
+        );
+
+        return data;
+    }
+
+    public async Task<WeatherDaysData> GetWeatherDataAsync(double latitude, double longitude, string startDate, string endDate)
+    {
+        string key = $"weather:${startDate}:${endDate}:${latitude}-${longitude}";
+        var cachedData = await _cache.GetStringAsync(key);
+        if (cachedData is not null)
+            return JsonSerializer.Deserialize<WeatherDaysData>(cachedData)!;
+
+        var dto = await _repository.GetWeatherDataAsync(latitude,longitude,startDate,endDate);
+        WeatherDaysData data = new()
+        {
+            Timezone = dto.Timezone,
+            WeatherDays = [.. dto.WeatherDays.Select(d => new WeatherDayData
+                {
+                    Datetime = d.Datetime,
+                    Conditions = d.Conditions,
+                    TempMax = d.TempMax,
+                    TempMin = d.TempMin,
+                    ChanceOfRain = d.ChanceOfRain,
+                    Humidity = d.Humidity,
+                    Description = d.Description
+                })]
+        };
+
+        await _cache.SetStringAsync(key,
+            JsonSerializer.Serialize(data),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            }
+        );
+
+        return data;
+    }
+
     public async Task<CurrentWeatherData> GetCurrentWeatherAsync(double latitude, double longitude)
     {
         string key = $"weather:current:${latitude}-${longitude}";
@@ -41,29 +105,28 @@ class WeatherService(IDistributedCache _cache, IWeatherForecastRepository _repos
         return data;
     }
 
-    public async Task<WeatherDaysData> GetWeatherDataAsync(double latitude, double longitude, string startDate, string endDate)
+    public async Task<WeatherDaysData> GetLastWeekWeatherAsync(double latitude, double longitude)
     {
-        string key = $"weather:${startDate}:${endDate}:${latitude}-${longitude}";
+        string key = $"weather:lastweek:${latitude}-${longitude}";
         var cachedData = await _cache.GetStringAsync(key);
         if (cachedData is not null)
             return JsonSerializer.Deserialize<WeatherDaysData>(cachedData)!;
-
-        var dto = await _repository.GetWeatherDataAsync(latitude,longitude,startDate,endDate);
+        
+        var dto = await _repository.GetLastWeekWeatherDataAsync(latitude,longitude);
         WeatherDaysData data = new()
         {
-          Timezone = dto.Timezone,
-          WeatherDays = [.. dto.WeatherDays.Select(d => new WeatherDayData
-            {
-                Datetime = d.Datetime,
-                Conditions = d.Conditions,
-                TempMax = d.TempMax,
-                TempMin = d.TempMin,
-                ChanceOfRain = d.ChanceOfRain,
-                Humidity = d.Humidity,
-                Description = d.Description
-            })]
+            Timezone = dto.Timezone,
+            WeatherDays = [.. dto.WeatherDays.Select(d => new WeatherDayData
+                {
+                    Datetime = d.Datetime,
+                    Conditions = d.Conditions,
+                    TempMax = d.TempMax,
+                    TempMin = d.TempMin,
+                    ChanceOfRain = d.ChanceOfRain,
+                    Humidity = d.Humidity,
+                    Description = d.Description
+                })]
         };
-
         await _cache.SetStringAsync(key,
             JsonSerializer.Serialize(data),
             new DistributedCacheEntryOptions
@@ -75,28 +138,29 @@ class WeatherService(IDistributedCache _cache, IWeatherForecastRepository _repos
         return data;
     }
 
-    public async Task<WeatherDaysData> GetLastWeekWeatherAsync(double latitude, double longitude)
+    public async Task<WeatherDaysData> GetWeatherForecastAsync(double latitude, double longitude)
     {
-        string key = $"weather:lastweek:${latitude}-${longitude}";
+        string key = $"weather:forecast:${latitude}-${longitude}";
         var cachedData = await _cache.GetStringAsync(key);
         if (cachedData is not null)
             return JsonSerializer.Deserialize<WeatherDaysData>(cachedData)!;
         
-        var dto = await _repository.GetLastWeekWeatherDataAsync(latitude,longitude);
+        var dto = await _repository.GetWeatherForecastDataAsync(latitude,longitude);
         WeatherDaysData data = new()
         {
-          Timezone = dto.Timezone,
-          WeatherDays = [.. dto.WeatherDays.Select(d => new WeatherDayData
-            {
-                Datetime = d.Datetime,
-                Conditions = d.Conditions,
-                TempMax = d.TempMax,
-                TempMin = d.TempMin,
-                ChanceOfRain = d.ChanceOfRain,
-                Humidity = d.Humidity,
-                Description = d.Description
-            })]
+            Timezone = dto.Timezone,
+            WeatherDays = [.. dto.WeatherDays.Select(d => new WeatherDayData
+                {
+                    Datetime = d.Datetime,
+                    Conditions = d.Conditions,
+                    TempMax = d.TempMax,
+                    TempMin = d.TempMin,
+                    ChanceOfRain = d.ChanceOfRain,
+                    Humidity = d.Humidity,
+                    Description = d.Description
+                })]
         };
+
         await _cache.SetStringAsync(key,
             JsonSerializer.Serialize(data),
             new DistributedCacheEntryOptions
