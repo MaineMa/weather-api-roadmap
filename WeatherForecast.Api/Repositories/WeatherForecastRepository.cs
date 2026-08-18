@@ -65,7 +65,7 @@ class WeatherForecastRepository(HttpClient httpClient, IConfiguration configurat
         response.EnsureSuccessStatusCode();
         var json = await response.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<WeatherDaysData>(json,_jsonOptions) ?? throw new Exception("Couldn't deserialize weather response");
-        var day = data.WeatherDays.FirstOrDefault() ?? throw new Exception("No se encontraron datos del día actual.");
+        var day = data.WeatherDays.FirstOrDefault() ?? throw new Exception("Couldn't find today's data.");
         return new TodayWeatherDataDto 
         {
             Datetime = day.Datetime,
